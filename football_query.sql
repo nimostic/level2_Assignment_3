@@ -5,6 +5,8 @@
 --               actual data types, relational keys, and check criteria.
 -- =========================================================================
 
+create database football_ticket;
+
 -- DROP TABLES IF THEY ALREADY EXIST TO PREVENT CONFLICTS
 DROP TABLE IF EXISTS Bookings;
 DROP TABLE IF EXISTS Matches;
@@ -14,48 +16,40 @@ DROP TABLE IF EXISTS Users;
 -- 1. CREATE USERS TABLE
 -- =========================================================================
 CREATE TABLE Users (
-    user_id TYPE,
-    full_name TYPE,
-    email TYPE,
-    role TYPE,
-    phone_number TYPE,
-    
-    -- Write your constraint to make 'user_id' the Primary Key
-    -- Write your constraint to ensure 'email' values are never duplicated
-    -- Write your check constraint to restrict 'role' to specific allowed strings
+    user_id SERIAL PRIMARY KEY,
+    full_name VARCHAR(50) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(20) NOT NULL
+        CHECK (role IN ('Football Fan', 'Ticket Manager')),
+    phone_number VARCHAR(20)
 );
 
 -- =========================================================================
 -- 2. CREATE MATCHES TABLE
 -- =========================================================================
 CREATE TABLE Matches (
-    match_id TYPE,
-    fixture TYPE,
-    tournament_category TYPE,
-    base_ticket_price TYPE,
-    match_status TYPE,
-    
-    -- Write your constraint to make 'match_id' the Primary Key
-    -- Write your check constraint to prevent negative ticket prices
-    -- Write your check constraint to restrict 'match_status' values
+    match_id serial primary key,
+    fixture varchar(50) not null,
+    tournament_category varchar(50) not null,
+    base_ticket_price decimal(10,2) not null,
+    match_status varchar(20) not null
+        check (match_status in ('Available', 'Selling Fast', 'Sold Out', 'Postponed'))
 );
 
 -- =========================================================================
 -- 3. CREATE BOOKINGS TABLE
 -- =========================================================================
 CREATE TABLE Bookings (
-    booking_id TYPE,
-    user_id TYPE,
-    match_id TYPE,
-    seat_number TYPE,
-    payment_status TYPE,
-    total_cost TYPE,
-    
-    -- Write your constraint to make 'booking_id' the Primary Key
-    -- Write your Foreign Key constraint linking 'user_id' to the Users table
-    -- Write your Foreign Key constraint linking 'match_id' to the Matches table
-    -- Write your check constraint to ensure 'total_cost' is non-negative
-    -- Write your check constraint to restrict 'payment_status' values
+    booking_id serial primary key,
+    user_id int not null,
+    match_id int not null,
+    seat_number varchar(10),
+    payment_status varchar(20)
+      check (payment_status in ('Pending', 'Confirmed', 'Cancelled', 'Refunded')),
+    total_cost decimal(10,2) not null
+    check(total_cost >= 0),
+    foreign key (user_id) references Users(user_id),
+    foreign key (match_id) references Matches(match_id)
 );
 
 

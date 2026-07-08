@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS Users;
 -- 1. CREATE USERS TABLE
 -- =========================================================================
 CREATE TABLE Users (
-    user_id SERIAL PRIMARY KEY,
+    user_id PRIMARY KEY,
     full_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     role VARCHAR(20) NOT NULL
@@ -28,7 +28,7 @@ CREATE TABLE Users (
 -- 2. CREATE MATCHES TABLE
 -- =========================================================================
 CREATE TABLE Matches (
-    match_id serial primary key,
+    match_id primary key,
     fixture varchar(50) not null,
     tournament_category varchar(50) not null,
     base_ticket_price decimal(10,2) not null,
@@ -40,7 +40,7 @@ CREATE TABLE Matches (
 -- 3. CREATE BOOKINGS TABLE
 -- =========================================================================
 CREATE TABLE Bookings (
-    booking_id serial primary key,
+    booking_id primary key,
     user_id int not null,
     match_id int not null,
     seat_number varchar(10),
@@ -81,3 +81,85 @@ INSERT INTO Bookings (booking_id, user_id, match_id, seat_number, payment_status
 (503, 2, 101, 'A-13', 'Confirmed', 150.00),
 (504, 2, 101, NULL, NULL, 150.00),
 (505, 3, 102, 'C-20', 'Pending', 120.00);
+
+
+
+-- =========================================================================
+-- Query's
+-- =========================================================================
+
+-- ans of the 1
+select match_id,fixture,base_ticket_price from matches
+  where tournament_category= 'Champions League' and match_status = 'Available';
+
+-- ans of the 2
+
+select user_id,full_name,email from Users where full_name Ilike 'Tanvir%' or full_name Ilike '%Haque%';
+
+-- ans of the 3
+
+select
+  booking_id,
+  user_id,
+  match_id,
+  coalesce(payment_status, 'Action Required') as systematic_status
+from
+  bookings
+where
+  payment_status is null;
+
+-- ans of the 4
+select
+  b.booking_id,
+  u.full_name,
+  m.fixture,
+  b.total_cost
+from
+  bookings as b
+  inner join users as u on u.user_id = b.user_id
+  inner join matches as m on b.match_id = m.match_id;
+
+
+-- ans of the 5
+
+select
+  u.user_id,
+  u.full_name,
+  b.booking_id
+from
+  users as u
+  left join bookings as b on b.user_id = u.user_id;
+
+
+
+
+-- ans of the 6
+
+select
+  booking_id,
+  match_id,
+  total_cost
+from
+  bookings
+where
+  total_cost >
+(select
+  avg(total_cost)
+from
+  bookings)
+
+
+
+-- ans of the 7
+
+select
+  match_id,
+  fixture,
+  base_ticket_price
+from
+  matches order by  base_ticket_price desc
+limit
+  2
+offset
+  1
+
